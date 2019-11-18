@@ -13,6 +13,8 @@ from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
 from flask_migrate import Migrate
+# Model Description
+from models import *
 
 #----------------------------------------------------------------------------#
 # App Config.
@@ -23,17 +25,14 @@ moment = Moment(app)
 app.config.from_object('config')
 db = SQLAlchemy(app)
 
-migrate = Migrate(app, db)
-
-# TODO: connect to a local postgresql database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://sven@localhost:5432/fyyur'
 
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
-
+# Tagungsort
 class Venue(db.Model):
-    __tablename__ = 'Venue'
+    __tablename__ = 'venue'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -43,11 +42,15 @@ class Venue(db.Model):
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
+    website_link = db.Column(db.String(500))
+    seeking_venue = db.Column(db.Boolean)
+    seeking_description = db.Column(db.String(250))
 
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    def __repr__(self):
+        return f'<Venue {self.id} {self.name}>'
 
 class Artist(db.Model):
-    __tablename__ = 'Artist'
+    __tablename__ = 'artist'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -57,10 +60,32 @@ class Artist(db.Model):
     genres = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
+    website_link = db.Column(db.String(500))
+    seeking_venue = db.Column(db.Boolean)
+    seeking_description = db.Column(db.String(250))
 
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    def __repr__(self):
+        return f'<Artist {self.id} {self.name}>'
+
+
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+
+class Show(db.Model):
+    __tablename__ = 'show'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    show_date = db.Column(db.DateTime)
+    artist_id = db.Column(db.Integer) # foreign key
+    venue_id = db.Column(db.Integer) # foreign key
+
+    def __repr__(self):
+        return f'<Name {self.id} {self.name}>'
+
+
+
+migrate = Migrate(app, db)
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -420,6 +445,8 @@ def create_artist_submission():
   # called upon submitting the new artist listing form
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
+
+
 
   # on successful db insert, flash success
   flash('Artist ' + request.form['name'] + ' was successfully listed!')
