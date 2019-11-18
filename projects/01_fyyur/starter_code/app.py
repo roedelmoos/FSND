@@ -14,7 +14,7 @@ from flask_wtf import Form
 from forms import *
 from flask_migrate import Migrate
 # Model Description
-from models import *
+from models import Venue, Artist
 
 #----------------------------------------------------------------------------#
 # App Config.
@@ -30,60 +30,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://sven@localhost:5432/fyyur'
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
-# Tagungsort
-class Venue(db.Model):
-    __tablename__ = 'venue'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    address = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-    website_link = db.Column(db.String(500))
-    seeking_venue = db.Column(db.Boolean)
-    seeking_description = db.Column(db.String(250))
-
-    def __repr__(self):
-        return f'<Venue {self.id} {self.name}>'
-
-class Artist(db.Model):
-    __tablename__ = 'artist'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-    website_link = db.Column(db.String(500))
-    seeking_venue = db.Column(db.Boolean)
-    seeking_description = db.Column(db.String(250))
-
-    def __repr__(self):
-        return f'<Artist {self.id} {self.name}>'
-
-
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
-
-class Show(db.Model):
-    __tablename__ = 'show'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    show_date = db.Column(db.DateTime)
-    artist_id = db.Column(db.Integer) # foreign key
-    venue_id = db.Column(db.Integer) # foreign key
-
-    def __repr__(self):
-        return f'<Name {self.id} {self.name}>'
-
-
 
 migrate = Migrate(app, db)
 
@@ -112,7 +60,6 @@ def index():
 
 #  Venues
 #  ----------------------------------------------------------------
-
 @app.route('/venues')
 def venues():
   # TODO: replace with real venues data.
@@ -250,6 +197,20 @@ def create_venue_form():
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
+  venue = Venue(name=request.form.get('name'),
+                city=request.form.get('city'),
+                state=request.form.get('state'),
+                address=request.form.get('address'),
+                phone=request.form.get('phone'),
+                genres=request.form.getlist('genres'),
+                facebook_link=request.form.get('facebook_link'))
+  try:
+    db.session.add(venue)
+    db.session.commit()
+  except:
+    db.session.rollback()
+  finally:
+    db.session.close()
   # TODO: modify data to be the data object returned from db insertion
 
   # on successful db insert, flash success
@@ -444,6 +405,16 @@ def create_artist_form():
 def create_artist_submission():
   # called upon submitting the new artist listing form
   # TODO: insert form data as a new Venue record in the db, instead
+  artist =  Artist()
+  artist.name=request.form.get('name')
+
+  try:
+    db.session.add(artist)
+    db.session.commit()
+  except:
+    db.session.rollback()
+  finally:
+    db.session.close()
   # TODO: modify data to be the data object returned from db insertion
 
 
